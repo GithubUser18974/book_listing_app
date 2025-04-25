@@ -3,6 +3,7 @@ import 'package:book_listing_app/common/utils/debouncer.dart';
 import 'package:book_listing_app/features/home/domain/entities/book.dart';
 import 'package:book_listing_app/features/home/presentation/cubit/book_cubit.dart';
 import 'package:book_listing_app/features/home/presentation/widgets/book_list_item.dart';
+import 'package:book_listing_app/features/home/presentation/widgets/book_list_item_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -99,8 +100,9 @@ class _BookListScreenState extends State<BookListScreen> {
         },
         builder: (context, state) {
           if (state is BookInitial || state is BookLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
+            return ListView.builder(
+              itemCount: 5,
+              itemBuilder: (context, index) => const BookListItemShimmer(),
             );
           }
 
