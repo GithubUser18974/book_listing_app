@@ -1,4 +1,6 @@
 import 'package:book_listing_app/common/constants/app_constants.dart';
+import 'package:book_listing_app/common/utils/debouncer.dart';
+import 'package:book_listing_app/features/home/domain/entities/book.dart';
 import 'package:book_listing_app/features/home/presentation/cubit/book_cubit.dart';
 import 'package:book_listing_app/features/home/presentation/widgets/book_list_item.dart';
 import 'package:flutter/material.dart';
@@ -15,19 +17,21 @@ class BookListScreen extends StatefulWidget {
 class _BookListScreenState extends State<BookListScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final Debouncer _searchDebouncer = Debouncer();
   bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<BookCubit>().loadInitialBooks();
     _scrollController.addListener(_onScroll);
+    context.read<BookCubit>().loadInitialBooks();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
@@ -38,12 +42,14 @@ class _BookListScreenState extends State<BookListScreen> {
     }
   }
 
-  void _onSearchSubmitted(String query) {
-    if (query.isNotEmpty) {
-      context.read<BookCubit>().searchBooks(query);
-    } else {
-      context.read<BookCubit>().loadInitialBooks();
-    }
+  void _onSearchChanged(String query) {
+    _searchDebouncer(() {
+      if (query.isNotEmpty) {
+        context.read<BookCubit>().searchBooks(query);
+      } else {
+        context.read<BookCubit>().loadInitialBooks();
+      }
+    });
   }
 
   @override
@@ -62,7 +68,7 @@ class _BookListScreenState extends State<BookListScreen> {
                 ),
                 style: Theme.of(context).textTheme.bodyLarge,
                 autofocus: true,
-                onSubmitted: _onSearchSubmitted,
+                onChanged: _onSearchChanged,
               )
             : const Text('Book Listing'),
         actions: [

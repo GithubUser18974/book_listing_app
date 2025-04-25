@@ -5,12 +5,15 @@ A Flutter application that allows users to browse and search books from the Proj
 ## Features
 
 - Browse books with infinite scrolling
-- Search books by title or author
+- Search books by title or author with debouncing (500ms delay)
 - View book details including cover image, title, authors, and summary
-- Expandable book summaries
+- Expandable book summaries (only shows "Show More" when text exceeds 3 lines)
 - Offline caching support
 - Responsive design for different screen sizes
 - Dark mode support
+- Network error handling with automatic retries
+- DNS resolution error handling
+- Automatic fallback to cached data when offline
 
 ## Technical Requirements
 
@@ -25,6 +28,8 @@ The application is built using:
 - CachedNetworkImage for image loading and caching
 - ScreenUtil for responsive design
 - Google Fonts for typography
+- Debouncer for search optimization
+- Connectivity Plus for network state monitoring
 
 ## Getting Started
 
@@ -38,15 +43,18 @@ The application is built using:
 ### Installation
 
 1. Clone the repository:
+```bash
 git clone <repository-url>
 cd book_listing_app
 ```
 
 2. Install dependencies:
+```bash
 flutter pub get
 ```
 
 3. Run the app:
+```bash
 flutter run
 ```
 
@@ -95,4 +103,37 @@ lib/
 
 5. **Error Handling**: Comprehensive error handling is implemented throughout the app to provide a smooth user experience even when errors occur.
 
+6. **Search Optimization**: 
+   - Implemented debouncing (500ms delay) to prevent excessive API calls while typing
+   - Search triggers automatically as the user types
+   - Previous searches are cancelled if the user types again within the delay period
 
+7. **Text Overflow Handling**:
+   - Book summaries are limited to 3 lines by default
+   - "Show More" button only appears when the text actually exceeds 3 lines
+   - Text is properly truncated with ellipsis when it's too long
+
+8. **Network Resilience**:
+   - Automatic retry mechanism for failed requests
+   - Graceful handling of DNS resolution errors
+   - Fallback to cached data when network requests fail
+   - Clear indication when showing cached data
+
+## Testing
+
+To run the tests:
+```bash
+flutter test
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
