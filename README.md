@@ -1,138 +1,143 @@
 # Book Listing App
 
-A Flutter application that allows users to browse and search books from the Project Gutenberg library using the Gutendex API.
+A Flutter application that lists books with features like search, pagination, and offline caching.
+
+## Architecture
+
+The application follows Clean Architecture principles with the following layers:
+
+### 1. Presentation Layer
+- **Cubits**: State management using Flutter Bloc
+  - `BookCubit`: Manages book listing state and operations
+- **Screens**: UI components
+  - `BookListScreen`: Main screen displaying book list with search and pagination
+- **Widgets**: Reusable UI components
+  - `BookListItem`: Individual book item display
+  - `BookListItemShimmer`: Loading state placeholder
+
+### 2. Domain Layer
+- **Entities**: Core business objects
+  - `Book`: Book entity with properties and JSON serialization
+  - `BookResponse`: Response wrapper for book list with cache status
+- **Use Cases**: Business logic
+  - `GetBooksUseCase`: Fetches books from repository
+  - `GetCachedBooksUseCase`: Retrieves cached books
+  - `CacheBooksUseCase`: Caches books locally
+- **Repository Interfaces**: Abstract data operations
+  - `BookRepository`: Defines book-related operations
+
+### 3. Data Layer
+- **Repositories**: Implementation of repository interfaces
+  - `BookRepositoryImpl`: Implements book repository operations
+- **Data Sources**: Data providers
+  - `BookRemoteDataSource`: Interface for remote data operations
+  - `BookLocalDataSource`: Interface for local data operations
+  - `BookRemoteDataSourceImpl`: Implements remote data operations
+  - `BookLocalDataSourceImpl`: Implements local data operations
 
 ## Features
 
-- Browse books with infinite scrolling
-- Search books by title or author with debouncing (500ms delay)
-- View book details including cover image, title, authors, and summary
-- Expandable book summaries (only shows "Show More" when text exceeds 3 lines)
-- Offline caching support
-- Responsive design for different screen sizes
-- Dark mode support
-- Network error handling with automatic retries
-- DNS resolution error handling
-- Automatic fallback to cached data when offline
+### Book Listing
+- Displays books in a scrollable list
+- Implements pagination for loading more books
+- Shows shimmer loading effect during data fetching
+- Handles empty states and error cases
 
-## Technical Requirements
+### Search Functionality
+- Real-time search with debouncing
+- Searches through book titles and authors
+- Maintains search state during pagination
 
-The application is built using:
+### Caching
+- Caches book data locally using SharedPreferences
+- Shows cached data when offline
+- Indicates when data is from cache
 
-- Flutter SDK
-- Clean Architecture
-- Cubit for state management
-- Dependency Injection with GetIt
-- HTTP for API calls
-- SharedPreferences for local caching
-- CachedNetworkImage for image loading and caching
-- ScreenUtil for responsive design
-- Google Fonts for typography
-- Debouncer for search optimization
-- Connectivity Plus for network state monitoring
+## Dependencies
 
-## Getting Started
-
-### Prerequisites
-
-- Flutter SDK (version 3.6.0 or higher)
-- Dart SDK (version 3.0.0 or higher)
-- Android Studio / VS Code with Flutter extensions
-- Android SDK / iOS development tools
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd book_listing_app
-```
-
-2. Install dependencies:
-```bash
-flutter pub get
-```
-
-3. Run the app:
-```bash
-flutter run
-```
+- **State Management**: `flutter_bloc: ^8.1.4`
+- **HTTP Client**: `http: ^1.3.0`
+- **Image Caching**: `cached_network_image: ^3.4.1`
+- **Functional Programming**: `dartz: ^0.10.1`
+- **Dependency Injection**: `get_it: ^8.0.3`
+- **Equality Comparison**: `equatable: ^2.0.5`
+- **Local Storage**: `shared_preferences: ^2.2.2`
+- **Network Status**: `connectivity_plus: ^5.0.2`
+- **Environment Variables**: `flutter_dotenv: ^5.1.0`
+- **Internationalization**: `intl: ^0.19.0`
+- **Loading Effects**: `shimmer: ^3.0.0`
+- **Custom Fonts**: `google_fonts: ^6.1.0`
+- **Responsive UI**: `flutter_screenutil: ^5.9.3`
 
 ## Project Structure
 
-The project follows Clean Architecture principles:
-
 ```
 lib/
-├── common/
-│   └── constants/
-│       ├── app_constants.dart
-│       └── theme_constants.dart
-├── features/
-│   └── home/
-│       ├── data/
-│       │   ├── models/
-│       │   │   └── book_model.dart
-│       │   └── repositories/
-│       │       └── book_repository_impl.dart
-│       ├── domain/
-│       │   ├── entities/
-│       │   │   └── book.dart
-│       │   └── repositories/
-│       │       └── book_repository.dart
-│       └── presentation/
-│           ├── cubit/
-│           │   ├── book_cubit.dart
-│           │   └── book_state.dart
-│           ├── screens/
-│           │   └── book_list_screen.dart
-│           └── widgets/
-│               └── book_list_item.dart
-└── main.dart
+├── common/           # Shared utilities and constants
+├── core/            # Core functionality and base classes
+├── features/        # Feature-specific code
+│   └── home/        # Home feature
+│       ├── data/    # Data layer implementation
+│       ├── domain/  # Domain layer (entities, use cases)
+│       └── presentation/ # UI components
+└── main.dart        # Application entry point
 ```
 
-## Design Decisions
+## Data Flow
 
-1. **Clean Architecture**: The project follows Clean Architecture principles to separate concerns and make the codebase more maintainable and testable.
+1. **Initial Load**:
+   ```
+   UI → BookCubit → GetBooksUseCase → BookRepository → RemoteDataSource → API
+   ```
 
-2. **Cubit for State Management**: Cubit was chosen over other state management solutions for its simplicity and effectiveness in managing the book listing state.
+2. **Search**:
+   ```
+   UI → BookCubit → GetBooksUseCase → BookRepository → RemoteDataSource → API
+   ```
 
-3. **Offline Support**: The app implements offline caching using SharedPreferences to store book data locally, allowing users to access previously loaded books without an internet connection.
+3. **Pagination**:
+   ```
+   UI → BookCubit → GetBooksUseCase → BookRepository → RemoteDataSource → API
+   ```
 
-4. **Responsive Design**: The UI is built using ScreenUtil to ensure consistent layout across different screen sizes and orientations.
+4. **Caching**:
+   ```
+   BookCubit → CacheBooksUseCase → BookRepository → LocalDataSource → SharedPreferences
+   ```
 
-5. **Error Handling**: Comprehensive error handling is implemented throughout the app to provide a smooth user experience even when errors occur.
+5. **Offline Access**:
+   ```
+   UI → BookCubit → GetCachedBooksUseCase → BookRepository → LocalDataSource → SharedPreferences
+   ```
 
-6. **Search Optimization**: 
-   - Implemented debouncing (500ms delay) to prevent excessive API calls while typing
-   - Search triggers automatically as the user types
-   - Previous searches are cancelled if the user types again within the delay period
+## Error Handling
 
-7. **Text Overflow Handling**:
-   - Book summaries are limited to 3 lines by default
-   - "Show More" button only appears when the text actually exceeds 3 lines
-   - Text is properly truncated with ellipsis when it's too long
+The application implements comprehensive error handling:
+- Network errors are caught and displayed to the user
+- Empty states are handled gracefully
+- Loading states are shown during data fetching
+- Cache misses are handled with appropriate fallbacks
 
-8. **Network Resilience**:
-   - Automatic retry mechanism for failed requests
-   - Graceful handling of DNS resolution errors
-   - Fallback to cached data when network requests fail
-   - Clear indication when showing cached data
+## Getting Started
 
-## Testing
-
-To run the tests:
-```bash
-flutter test
-```
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+3. Create a `.env` file in the root directory with your API configuration
+4. Run the application:
+   ```bash
+   flutter run
+   ```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
 
 ## License
 

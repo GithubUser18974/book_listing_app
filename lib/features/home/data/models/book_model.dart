@@ -5,8 +5,8 @@ class BookModel extends Book {
     required super.id,
     required super.title,
     required super.authors,
+    required super.summaries,
     super.coverImage,
-    super.summary,
     super.subjects = const [],
     super.languages = const [],
     super.downloadUrl,
@@ -21,7 +21,10 @@ class BookModel extends Book {
               .toList() ??
           [],
       coverImage: json['formats']?['image/jpeg'] as String?,
-      summary: (json['summaries'] as List? ?? []).join("\n"),
+      summaries: (json['summaries'] as List<dynamic>?)
+              ?.map((subject) => subject as String)
+              .toList() ??
+          [],
       subjects: (json['subjects'] as List<dynamic>?)
               ?.map((subject) => subject as String)
               .toList() ??
@@ -44,7 +47,7 @@ class BookModel extends Book {
                 'name': e,
               })
           .toList(),
-      'summary': summary,
+      'summaries': summaries,
       'subjects': subjects,
       'languages': languages,
       'formats': {

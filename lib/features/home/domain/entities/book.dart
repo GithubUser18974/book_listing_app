@@ -15,17 +15,19 @@ class Book extends Equatable {
   final String title;
   final List<String> authors;
   final String? coverImage;
-  final String? summary;
+  final List<String> summaries;
   final List<String> subjects;
   final List<String> languages;
   final String? downloadUrl;
+
+  String? get summary => summaries.join("\n");
 
   const Book({
     required this.id,
     required this.title,
     required this.authors,
     this.coverImage,
-    this.summary,
+    required this.summaries,
     this.subjects = const [],
     this.languages = const [],
     this.downloadUrl,
