@@ -1,17 +1,16 @@
 import 'package:book_listing_app/common/constants/app_constants.dart';
 import 'package:book_listing_app/common/constants/theme_constants.dart';
-import 'package:book_listing_app/features/home/domain/repositories/book_repository.dart';
 import 'package:book_listing_app/features/home/presentation/cubit/book_cubit.dart';
 import 'package:book_listing_app/features/home/presentation/screens/book_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'common/service_locator/service_locator.dart';
+import 'core/di/injection_container.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await ServiceLocator.setupDependencies();
+  await InjectionContainer.init();
   runApp(const MyApp());
 }
 
@@ -31,9 +30,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeConstants.lightTheme,
           darkTheme: ThemeConstants.darkTheme,
           home: BlocProvider(
-            create: (context) => BookCubit(
-              repository: getIt<BookRepository>(),
-            ),
+            create: (context) => sl<BookCubit>(),
             child: const BookListScreen(),
           ),
         );
