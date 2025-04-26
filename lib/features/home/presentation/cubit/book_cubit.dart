@@ -1,7 +1,5 @@
 import 'package:book_listing_app/features/home/domain/entities/book.dart';
-import 'package:book_listing_app/features/home/domain/usecases/cache_books_usecase.dart';
 import 'package:book_listing_app/features/home/domain/usecases/get_books_usecase.dart';
-import 'package:book_listing_app/features/home/domain/usecases/get_cached_books_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,87 +7,111 @@ part 'book_state.dart';
 
 class BookCubit extends Cubit<BookState> {
   final GetBooksUseCase getBooksUseCase;
-  final GetCachedBooksUseCase getCachedBooksUseCase;
-  final CacheBooksUseCase cacheBooksUseCase;
-  
-  int currentPage = 1;
-  String? currentSearchQuery;
-  bool hasReachedMax = false;
 
   BookCubit({
     required this.getBooksUseCase,
-    required this.getCachedBooksUseCase,
-    required this.cacheBooksUseCase,
-  }) : super(BookInitial());
+  }) : super(BookInitial()) {
+    loadInitialBooks();
+  }
 
   Future<void> loadInitialBooks() async {
-    emit(BookLoading());
-    currentPage = 1;
-    hasReachedMax = false;
-    currentSearchQuery = null;
+    emit(BookLoading(
+      currentPage: 1,
+      hasReachedMax: false,
+      currentSearchQuery: null,
+    ));
 
-    final result = await getBooksUseCase(page: currentPage);
-    result.fold(
-      (failure) => emit(BookError(failure.toString())),
-      (books) {
-        emit(BookLoaded(books: books));
-        cacheBooksUseCase(books);
-      },
-    );
+    await _getData();
   }
 
   Future<void> searchBooks(String query) async {
-    emit(BookLoading());
-    currentPage = 1;
-    hasReachedMax = false;
-    currentSearchQuery = query;
+    emit(BookLoading(
+      currentPage: 1,
+      hasReachedMax: false,
+      currentSearchQuery: query,
+    ));
+    _getData();
+  }
 
-    final result = await getBooksUseCase(
-      page: currentPage,
-      searchQuery: query,
-    );
-    result.fold(
-      (failure) => emit(BookError(failure.toString())),
-      (books) => emit(BookLoaded(books: books)),
-    );
+  Future<void> reload() async {
+    emit(BookLoading(
+      currentPage: 1,
+      hasReachedMax: false,
+      currentSearchQuery: state.currentSearchQuery,
+    ));
+    _getData();
   }
 
   Future<void> loadMoreBooks() async {
-    if (hasReachedMax) return;
+    if (state.hasReachedMax) return;
 
     final currentState = state;
     if (currentState is BookLoaded) {
+      emit(BookPaginating(
+        books: currentState.books,
+        hasReachedMax: false,
+        currentPage: currentState.currentPage,
+        currentSearchQuery: currentState.currentSearchQuery,
+        isCached: currentState.isCached,
+      ));
+
       final result = await getBooksUseCase(
-        page: currentPage + 1,
-        searchQuery: currentSearchQuery,
+        page: state.currentPage + 1,
+        searchQuery: state.currentSearchQuery,
       );
 
       result.fold(
-        (failure) => emit(BookError(failure.toString())),
-        (newBooks) {
-          if (newBooks.isEmpty) {
-            hasReachedMax = true;
-            emit(currentState.copyWith(hasReachedMax: true));
+        (failure) => emit(BookLoaded(
+          books: [...currentState.books],
+          hasReachedMax: currentState.hasReachedMax,
+          currentPage: currentState.currentPage,
+          currentSearchQuery: currentState.currentSearchQuery,
+          isCached: currentState.isCached,
+        )),
+        (booksResponse) {
+          if (booksResponse.books.isEmpty) {
+            emit(BookLoaded(
+              books: [...currentState.books, ...booksResponse.books],
+              hasReachedMax: true,
+              currentPage: currentState.currentPage + 1,
+              currentSearchQuery: currentState.currentSearchQuery,
+              isCached: booksResponse.isCache,
+            ));
           } else {
-            currentPage++;
-            emit(
-              currentState.copyWith(
-                books: [...currentState.books, ...newBooks],
-                hasReachedMax: false,
-              ),
-            );
+            emit(BookLoaded(
+              books: [...currentState.books, ...booksResponse.books],
+              hasReachedMax: false,
+              currentPage: currentState.currentPage + 1,
+              currentSearchQuery: currentState.currentSearchQuery,
+              isCached: booksResponse.isCache,
+            ));
           }
         },
       );
     }
   }
 
-  Future<void> loadCachedBooks() async {
-    emit(BookLoading());
-    final result = await getCachedBooksUseCase();
+  Future<void> _getData() async {
+    final result = await getBooksUseCase(
+      page: state.currentPage,
+    );
     result.fold(
-      (failure) => emit(BookError(failure.toString())),
-      (books) => emit(BookLoaded(books: books, isCached: true)),
+      (failure) => emit(
+        BookError(
+          failure.toString(),
+        ),
+      ),
+      (bookResponse) {
+        emit(
+          BookLoaded(
+            books: bookResponse.books,
+            currentSearchQuery: state.currentSearchQuery,
+            hasReachedMax: false,
+            currentPage: state.currentPage,
+            isCached: bookResponse.isCache,
+          ),
+        );
+      },
     );
   }
 }

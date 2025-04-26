@@ -1,7 +1,15 @@
 part of 'book_cubit.dart';
 
 abstract class BookState extends Equatable {
-  const BookState();
+  final int currentPage;
+  final String? currentSearchQuery;
+  final bool hasReachedMax;
+
+  const BookState({
+    this.currentPage = 1,
+    this.currentSearchQuery,
+    this.hasReachedMax = false,
+  });
 
   @override
   List<Object?> get props => [];
@@ -9,16 +17,23 @@ abstract class BookState extends Equatable {
 
 class BookInitial extends BookState {}
 
-class BookLoading extends BookState {}
+class BookLoading extends BookState {
+  const BookLoading({
+    super.currentPage = 1,
+    super.currentSearchQuery,
+    super.hasReachedMax = false,
+  });
+}
 
 class BookLoaded extends BookState {
   final List<Book> books;
-  final bool hasReachedMax;
   final bool isCached;
 
   const BookLoaded({
     required this.books,
-    this.hasReachedMax = false,
+    super.hasReachedMax = false,
+    super.currentPage,
+    super.currentSearchQuery,
     this.isCached = false,
   });
 
@@ -38,6 +53,34 @@ class BookLoaded extends BookState {
   List<Object?> get props => [books, hasReachedMax, isCached];
 }
 
+class BookPaginating extends BookState {
+  final List<Book> books;
+  final bool isCached;
+
+  const BookPaginating({
+    required this.books,
+    super.hasReachedMax,
+    super.currentPage,
+    super.currentSearchQuery,
+    this.isCached = false,
+  });
+
+  BookPaginating copyWith({
+    List<Book>? books,
+    bool? hasReachedMax,
+    bool? isCached,
+  }) {
+    return BookPaginating(
+      books: books ?? this.books,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      isCached: isCached ?? this.isCached,
+    );
+  }
+
+  @override
+  List<Object?> get props => [books, hasReachedMax, isCached];
+}
+
 class BookError extends BookState {
   final String message;
 
@@ -45,4 +88,4 @@ class BookError extends BookState {
 
   @override
   List<Object?> get props => [message];
-} 
+}

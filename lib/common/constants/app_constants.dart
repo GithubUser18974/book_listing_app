@@ -5,7 +5,7 @@ abstract class AppConstants {
   static const String booksEndpoint = '/books';
   static const Size designSize = Size(360, 690);
   static const int defaultPageSize = 20;
-  static const int maxLinesForSummary = 3;
+  static const int maxLinesForSummary = 6;
   static const String placeholderImage =
       'https://via.placeholder.com/150x200?text=No+Cover';
 

@@ -1,5 +1,15 @@
 import 'package:equatable/equatable.dart';
 
+class BookResponse {
+  final List<Book> books;
+  final bool isCache;
+
+  BookResponse({
+    required this.books,
+    required this.isCache,
+  });
+}
+
 class Book extends Equatable {
   final int id;
   final String title;
@@ -21,6 +31,19 @@ class Book extends Equatable {
     this.downloadUrl,
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'authors': authors,
+      'cover_image': coverImage,
+      'summary': summary,
+      'subjects': subjects,
+      'languages': languages,
+      'download_url': downloadUrl,
+    };
+  }
+
   @override
   List<Object?> get props => [
         id,
@@ -32,4 +55,4 @@ class Book extends Equatable {
         languages,
         downloadUrl,
       ];
-} 
+}

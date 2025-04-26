@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:book_listing_app/common/constants/app_constants.dart';
 import 'package:book_listing_app/features/home/domain/entities/book.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BookListItem extends StatefulWidget {
   final Book book;
 
   const BookListItem({
-    Key? key,
+    super.key,
     required this.book,
-  }) : super(key: key);
+  });
 
   @override
   State<BookListItem> createState() => _BookListItemState();
@@ -30,7 +30,8 @@ class _BookListItemState extends State<BookListItem> {
   }
 
   void _checkTextOverflow() {
-    final RenderBox renderBox = _textKey.currentContext?.findRenderObject() as RenderBox;
+    final RenderBox renderBox =
+        _textKey.currentContext?.findRenderObject() as RenderBox;
     final textPainter = TextPainter(
       text: TextSpan(
         text: widget.book.summary ?? '',
@@ -39,7 +40,9 @@ class _BookListItemState extends State<BookListItem> {
       maxLines: AppConstants.maxLinesForSummary,
       textDirection: TextDirection.ltr,
     );
-    textPainter.layout(maxWidth: renderBox.size.width);
+    textPainter.layout(
+      maxWidth: renderBox.size.width,
+    );
     setState(() {
       _hasOverflow = textPainter.didExceedMaxLines;
     });
@@ -53,7 +56,9 @@ class _BookListItemState extends State<BookListItem> {
         vertical: 8.h,
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(
+          16.r,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -61,9 +66,12 @@ class _BookListItemState extends State<BookListItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(
+                    8.r,
+                  ),
                   child: CachedNetworkImage(
-                    imageUrl: widget.book.coverImage ?? AppConstants.placeholderImage,
+                    imageUrl:
+                        widget.book.coverImage ?? AppConstants.placeholderImage,
                     width: 100.w,
                     height: 150.h,
                     fit: BoxFit.cover,
@@ -79,11 +87,15 @@ class _BookListItemState extends State<BookListItem> {
                       width: 100.w,
                       height: 150.h,
                       color: Colors.grey[300],
-                      child: const Icon(Icons.error),
+                      child: const Icon(
+                        Icons.error,
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(
+                  width: 16.w,
+                ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,13 +108,15 @@ class _BookListItemState extends State<BookListItem> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(
+                        height: 8.h,
+                      ),
                       Text(
                         widget.book.authors.join(', '),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey[600],
                             ),
-                        maxLines: 1,
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -111,7 +125,9 @@ class _BookListItemState extends State<BookListItem> {
               ],
             ),
             if (widget.book.summary != null) ...[
-              SizedBox(height: 16.h),
+              SizedBox(
+                height: 16.h,
+              ),
               LayoutBuilder(
                 builder: (context, constraints) {
                   return Column(
@@ -120,9 +136,11 @@ class _BookListItemState extends State<BookListItem> {
                       Text(
                         widget.book.summary!,
                         key: _textKey,
+                        maxLines: _isExpanded
+                            ? null
+                            : AppConstants.maxLinesForSummary,
                         style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: _isExpanded ? null : AppConstants.maxLinesForSummary,
-                        overflow: TextOverflow.ellipsis,
+                        overflow: _isExpanded ? null : TextOverflow.ellipsis,
                       ),
                       if (_hasOverflow)
                         TextButton(
@@ -133,7 +151,10 @@ class _BookListItemState extends State<BookListItem> {
                           },
                           child: Text(
                             _isExpanded ? 'Show Less' : 'Show More',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: Theme.of(context).primaryColor,
                                 ),
                           ),
@@ -148,4 +169,4 @@ class _BookListItemState extends State<BookListItem> {
       ),
     );
   }
-} 
+}

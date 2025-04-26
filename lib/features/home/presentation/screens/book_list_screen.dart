@@ -1,15 +1,16 @@
 import 'package:book_listing_app/common/constants/app_constants.dart';
 import 'package:book_listing_app/common/utils/debouncer.dart';
-import 'package:book_listing_app/features/home/domain/entities/book.dart';
 import 'package:book_listing_app/features/home/presentation/cubit/book_cubit.dart';
-import 'package:book_listing_app/features/home/presentation/widgets/book_list_item.dart';
+import 'package:book_listing_app/features/home/presentation/widgets/book_list_builder.dart';
 import 'package:book_listing_app/features/home/presentation/widgets/book_list_item_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BookListScreen extends StatefulWidget {
-  const BookListScreen({Key? key}) : super(key: key);
+  const BookListScreen({
+    super.key,
+  });
 
   @override
   State<BookListScreen> createState() => _BookListScreenState();
@@ -25,7 +26,6 @@ class _BookListScreenState extends State<BookListScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    context.read<BookCubit>().loadInitialBooks();
   }
 
   @override
@@ -71,10 +71,14 @@ class _BookListScreenState extends State<BookListScreen> {
                 autofocus: true,
                 onChanged: _onSearchChanged,
               )
-            : const Text('Book Listing'),
+            : const Text(
+                'Book Listing',
+              ),
         actions: [
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+            ),
             onPressed: () {
               setState(() {
                 _isSearching = !_isSearching;
@@ -87,100 +91,69 @@ class _BookListScreenState extends State<BookListScreen> {
           ),
         ],
       ),
-      body: BlocConsumer<BookCubit, BookState>(
-        listener: (context, state) {
-          if (state is BookError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          context.read<BookCubit>().reload();
         },
-        builder: (context, state) {
-          if (state is BookInitial || state is BookLoading) {
-            return ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) => const BookListItemShimmer(),
-            );
-          }
-
-          if (state is BookError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(state.message),
-                  SizedBox(height: 16.h),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<BookCubit>().loadInitialBooks();
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          if (state is BookLoaded) {
-            final books = state.books;
-            if (books.isEmpty) {
-              return Center(
-                child: Text(
-                  AppConstants.noBooksFound,
-                  style: Theme.of(context).textTheme.titleMedium,
+        child: BlocConsumer<BookCubit, BookState>(
+          listener: (context, state) {
+            if (state is BookError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
                 ),
               );
             }
-
-            return Column(
-              children: [
-                if (state.isCached)
-                  Container(
-                    padding: EdgeInsets.all(8.r),
-                    color: Colors.amber[100],
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.wifi_off,
-                          color: Colors.amber[900],
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'Showing cached data',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.amber[900],
-                                  ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: books.length + (state.hasReachedMax ? 0 : 1),
-                    itemBuilder: (context, index) {
-                      if (index == books.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-                      return BookListItem(book: books[index]);
-                    },
-                  ),
+          },
+          builder: (context, state) {
+            return (switch (state) {
+              (BookError error) => _errorWidget(
+                  error,
+                  context,
                 ),
-              ],
-            );
-          }
+              (BookPaginating paginating) => BooksListBuilder(
+                  books: paginating.books,
+                  isCached: paginating.isCached,
+                  isPaginating: true,
+                  scrollController: _scrollController,
+                ),
+              (BookLoaded loaded) => BooksListBuilder(
+                  books: loaded.books,
+                  isCached: loaded.isCached,
+                  isPaginating: false,
+                  scrollController: _scrollController,
+                ),
+              (_) => ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (context, index) => const BookListItemShimmer(),
+                ),
+            });
+          },
+        ),
+      ),
+    );
+  }
 
-          return const SizedBox.shrink();
-        },
+  Center _errorWidget(BookError state, BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            state.message,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: 16.h,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<BookCubit>().loadInitialBooks();
+            },
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }

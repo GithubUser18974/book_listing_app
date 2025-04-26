@@ -7,7 +7,7 @@ class GetBooksUseCase {
 
   GetBooksUseCase(this.repository);
 
-  Future<Either<Exception, List<Book>>> call({
+  Future<Either<Exception, BookResponse>> call({
     required int page,
     String? searchQuery,
   }) async {
@@ -16,4 +16,4 @@ class GetBooksUseCase {
       searchQuery: searchQuery,
     );
   }
-} 
+}

@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
 class BookListItemShimmer extends StatelessWidget {
-  const BookListItemShimmer({Key? key}) : super(key: key);
+  const BookListItemShimmer({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +15,9 @@ class BookListItemShimmer extends StatelessWidget {
         vertical: 8.h,
       ),
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(
+          16.r,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -28,11 +32,15 @@ class BookListItemShimmer extends StatelessWidget {
                     height: 150.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(
+                        8.r,
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(
+                  width: 16.w,
+                ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +53,9 @@ class BookListItemShimmer extends StatelessWidget {
                           height: 24.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(4.r),
+                            borderRadius: BorderRadius.circular(
+                              4.r,
+                            ),
                           ),
                         ),
                       ),
@@ -58,7 +68,9 @@ class BookListItemShimmer extends StatelessWidget {
                           height: 16.h,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(4.r),
+                            borderRadius: BorderRadius.circular(
+                              4.r,
+                            ),
                           ),
                         ),
                       ),
@@ -67,7 +79,9 @@ class BookListItemShimmer extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(
+              height: 16.h,
+            ),
             Shimmer.fromColors(
               baseColor: Colors.grey[300]!,
               highlightColor: Colors.grey[100]!,
@@ -79,25 +93,35 @@ class BookListItemShimmer extends StatelessWidget {
                     height: 16.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(4.r),
+                      borderRadius: BorderRadius.circular(
+                        4.r,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(
+                    height: 8.h,
+                  ),
                   Container(
                     width: double.infinity,
                     height: 16.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(4.r),
+                      borderRadius: BorderRadius.circular(
+                        4.r,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(
+                    height: 8.h,
+                  ),
                   Container(
                     width: 200.w,
                     height: 16.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(4.r),
+                      borderRadius: BorderRadius.circular(
+                        4.r,
+                      ),
                     ),
                   ),
                 ],
@@ -108,4 +132,4 @@ class BookListItemShimmer extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -13,8 +13,6 @@ class BookModel extends Book {
   });
 
   factory BookModel.fromJson(Map<String, dynamic> json) {
-    final formats = json['formats'] as Map<String, dynamic>?;
-
     return BookModel(
       id: json['id'] as int,
       title: json['title'] as String,
@@ -22,7 +20,7 @@ class BookModel extends Book {
               ?.map((author) => author['name'] as String)
               .toList() ??
           [],
-      coverImage: formats?['image/jpeg'] as String?,
+      coverImage: json['formats']?['image/jpeg'] as String?,
       summary: (json['summaries'] as List? ?? []).join("\n"),
       subjects: (json['subjects'] as List<dynamic>?)
               ?.map((subject) => subject as String)
@@ -32,20 +30,27 @@ class BookModel extends Book {
               ?.map((language) => language as String)
               .toList() ??
           [],
-      downloadUrl: formats?['text/html'] as String?,
+      downloadUrl: json['formats']?['text/html'] as String?,
     );
   }
 
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
-      'authors': authors,
-      'coverImage': coverImage,
+      'authors': authors
+          .map((e) => {
+                'name': e,
+              })
+          .toList(),
       'summary': summary,
       'subjects': subjects,
       'languages': languages,
-      'downloadUrl': downloadUrl,
+      'formats': {
+        'text/html': downloadUrl,
+        'image/jpeg': coverImage,
+      },
     };
   }
 }
