@@ -73,14 +73,49 @@ The application follows Clean Architecture principles with the following layers:
 
 ```
 lib/
-├── common/           # Shared utilities and constants
-├── core/            # Core functionality and base classes
-├── features/        # Feature-specific code
-│   └── home/        # Home feature
-│       ├── data/    # Data layer implementation
-│       ├── domain/  # Domain layer (entities, use cases)
-│       └── presentation/ # UI components
-└── main.dart        # Application entry point
+├── common/                    # Shared utilities and constants
+│   ├── constants/            # Application constants
+│   │   ├── app_constants.dart
+│   │   └── theme_constants.dart
+│   ├── services/             # Shared services
+│   │   ├── network_service.dart
+│   │   └── storage_service.dart
+│   └── utils/                # Utility functions
+│       ├── date_utils.dart
+│       └── string_utils.dart
+├── core/                     # Core functionality
+│   └── di/                   # Dependency injection
+│       ├── di_container.dart
+│       └── service_locator.dart
+├── features/                 # Feature-specific code
+│   └── home/                 # Home feature
+│       ├── data/             # Data layer implementation
+│       │   ├── datasources/  # Data sources
+│       │   │   ├── book_local_data_source.dart
+│       │   │   └── book_remote_data_source.dart
+│       │   ├── models/       # Data models
+│       │   │   └── book_model.dart
+│       │   └── repositories/ # Repository implementations
+│       │       └── book_repository_impl.dart
+│       ├── domain/           # Domain layer
+│       │   ├── entities/     # Business entities
+│       │   │   └── book.dart
+│       │   ├── repositories/ # Repository interfaces
+│       │   │   └── book_repository.dart
+│       │   └── usecases/     # Business logic
+│       │       ├── get_books_usecase.dart
+│       │       ├── get_cached_books_usecase.dart
+│       │       └── cache_books_usecase.dart
+│       └── presentation/      # UI layer
+│           ├── cubit/        # State management
+│           │   ├── book_cubit.dart
+│           │   └── book_state.dart
+│           ├── screens/      # Screens
+│           │   └── book_list_screen.dart
+│           └── widgets/      # Reusable widgets
+│               ├── book_list_item.dart
+│               └── book_list_item_shimmer.dart
+└── main.dart                 # Application entry point
 ```
 
 ## Data Flow
@@ -125,20 +160,9 @@ The application implements comprehensive error handling:
    ```bash
    flutter pub get
    ```
-3. Create a `.env` file in the root directory with your API configuration
+3. Modify file  '[app_constants.dart](lib/common/constants/app_constants.dart)' with your API configuration
 4. Run the application:
    ```bash
    flutter run
    ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
